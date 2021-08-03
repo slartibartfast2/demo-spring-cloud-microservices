@@ -10,6 +10,9 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
 
+jwt:
+  secret: BvPHGM8C0ia4uOuxxqPD5DTbWC9F9TWvPStp3pb7ARo0oK2mJ3pd3YG4lxA9i8bj6OTbadwezxgeEByY
+
 spring:
   cloud:
     gateway:
@@ -23,12 +26,25 @@ spring:
             - Path=/payment/**
           filters:
             - RewritePath=/payment/(?<path>.*), /$\{path}
+            - CustomGatewayFilter
         - id: card-api-service
           uri: lb://card-api-service
           predicates:
             - Path=/card/**
           filters:
             - RewritePath=/card/(?<path>.*), /$\{path}
+        - id: merchant-api-service
+          uri: lb://merchant-api-service
+          predicates:
+            - Path=/merchant/**
+          filters:
+            - RewritePath=/merchant/(?<path>.*), /$\{path}
+        - id: auth-api-service
+          uri: lb://auth-api-service
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<path>.*), /$\{path}
         - id: openapi
           uri: http://localhost:${server.port}
           predicates:

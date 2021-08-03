@@ -14,7 +14,7 @@ public class CardController {
 
     private final CardManager cardManager;
 
-    @GetMapping("/card/{paymentId}")
+    @GetMapping("/payment/{paymentId}")
     public Card retrieveCardByPayment(@PathVariable("paymentId") Long paymentId) {
         return cardManager.retrieveCardByPayment(paymentId);
     }

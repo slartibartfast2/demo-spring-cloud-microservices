@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "card-api-service")
 public interface CardClient {
 
-    @GetMapping("/card/{paymentId}")
+    @GetMapping("/payment/{paymentId}")
     Card findByPayment(@PathVariable("paymentId") Long paymentId);
 }
