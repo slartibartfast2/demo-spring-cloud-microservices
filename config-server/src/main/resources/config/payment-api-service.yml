@@ -12,3 +12,12 @@ logging:
 
 springdoc:
   packagesToScan: ea.slartibarfast.payment
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
+spring.zipkin.sender.type: rabbit
+spring.sleuth.sampler.probability: 1.0

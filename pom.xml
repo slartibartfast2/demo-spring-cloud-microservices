@@ -24,6 +24,7 @@
         <spring-cloud.version>2020.0.3</spring-cloud.version>
         <springdoc.openapi.version>1.5.10</springdoc.openapi.version>
         <projectlombok.version>1.18.20</projectlombok.version>
+        <spring-integration.version>5.5.1</spring-integration.version>
     </properties>
 
     <modules>
