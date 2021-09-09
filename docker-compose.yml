@@ -1,0 +1,106 @@
+version: '2.1'
+
+services:
+  card-api:
+    build: card-api-service
+    mem_limit: 350m
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  payment-api:
+    build: payment-api-service
+    mem_limit: 350m
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  merchant-api:
+    build: merchant-api-service
+    mem_limit: 350m
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  auth-api:
+    build: auth-api-service
+    mem_limit: 350m
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  gateway:
+    build: gateway-server
+    mem_limit: 350m
+    ports:
+      - "8060:8060"
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  discovery-server:
+    build: discovery-server
+    mem_limit: 350m
+    ports:
+      - "8061:8061"
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  config-server:
+    build: config-server
+    mem_limit: 350m
+    networks:
+      - my-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    mem_limit: 350m
+    networks:
+      - my-network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+  zipkin:
+    image: openzipkin/zipkin:2.12.9
+    mem_limit: 512m
+    networks:
+      - my-network
+    environment:
+      - STORAGE_TYPE=mem
+      - RABBIT_ADDRESSES=rabbitmq
+    ports:
+      - "9411:9411"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+networks:
+  my-network:
+    name: my-network

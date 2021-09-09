@@ -1,10 +1,18 @@
+app.eureka-server: localhost
+rabbitmq-server: 127.0.0.1
+
 server:
-  port: 0
+  port: 7001
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8061/eureka/
+      defaultZone: "http://${app.eureka-server}:8061/eureka/"
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
 
 logging:
   pattern:
@@ -13,11 +21,24 @@ logging:
 springdoc:
   packagesToScan: ea.slartibarfast.merchant.api
 
-spring.rabbitmq:
-  host: 127.0.0.1
-  port: 5672
-  username: guest
-  password: guest
+spring:
+  rabbitmq:
+    host: ${rabbitmq-server}
+    port: 5672
+    username: guest
+    password: guest
+  zipkin:
+    sender:
+      type: rabbit
+  sleuth:
+    sampler:
+      probability: 1.0
 
-spring.zipkin.sender.type: rabbit
-spring.sleuth.sampler.probability: 1.0
+---
+app.eureka-server: discovery-server
+rabbitmq-server: rabbitmq
+
+spring:
+  config:
+    activate:
+      on-profile: docker

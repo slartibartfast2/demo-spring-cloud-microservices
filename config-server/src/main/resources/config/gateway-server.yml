@@ -1,10 +1,19 @@
+app.config-server: localhost
+app.eureka-server: localhost
+rabbitmq-server: 127.0.0.1
+
 server:
   port: 8060
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8061/eureka/
+      defaultZone: "http://${app.eureka-server}:8061/eureka/"
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
 
 logging:
   pattern:
@@ -52,11 +61,24 @@ spring:
           filters:
             - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
 
-spring.rabbitmq:
-  host: 127.0.0.1
-  port: 5672
-  username: guest
-  password: guest
+  rabbitmq:
+    host: ${rabbitmq-server}
+    port: 5672
+    username: guest
+    password: guest
+  zipkin:
+    sender:
+      type: rabbit
+  sleuth:
+    sampler:
+      probability: 1.0
 
-spring.zipkin.sender.type: rabbit
-spring.sleuth.sampler.probability: 1.0
+---
+app.config-server: config-server
+app.eureka-server: discovery-server
+rabbitmq-server: rabbitmq
+
+spring:
+  config:
+    activate:
+      on-profile: docker
