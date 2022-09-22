@@ -1,0 +1,10 @@
+spring:
+  cloud.config.enabled: false
+  cloud.discovery.enabled: false
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+mock:
+  card.client.enabled: true

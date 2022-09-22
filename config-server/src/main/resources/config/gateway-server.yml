@@ -1,15 +1,6 @@
 server:
   port: 8060
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8061/eureka/
-
-logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
-
 jwt:
   secret: BvPHGM8C0ia4uOuxxqPD5DTbWC9F9TWvPStp3pb7ARo0oK2mJ3pd3YG4lxA9i8bj6OTbadwezxgeEByY
 
@@ -25,20 +16,21 @@ spring:
           predicates:
             - Path=/payment/**
           filters:
-            - RewritePath=/payment/(?<path>.*), /$\{path}
+            - StripPrefix=1
             - CustomGatewayFilter
         - id: card-api-service
           uri: lb://card-api-service
           predicates:
             - Path=/card/**
           filters:
-            - RewritePath=/card/(?<path>.*), /$\{path}
+            - StripPrefix=1
+            - CustomGatewayFilter
         - id: merchant-api-service
           uri: lb://merchant-api-service
           predicates:
             - Path=/merchant/**
           filters:
-            - RewritePath=/merchant/(?<path>.*), /$\{path}
+            - StripPrefix=1
         - id: auth-api-service
           uri: lb://auth-api-service
           predicates:
