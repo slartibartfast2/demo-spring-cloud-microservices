@@ -1,3 +1,6 @@
+app.config-server: localhost
+app.eureka-server: localhost
+
 server:
   port: 8060
 
@@ -43,3 +46,11 @@ spring:
             - Path=/v3/api-docs/**
           filters:
             - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+---
+app.config-server: config-server
+app.eureka-server: discovery-server
+
+spring:
+  config:
+    activate:
+      on-profile: docker

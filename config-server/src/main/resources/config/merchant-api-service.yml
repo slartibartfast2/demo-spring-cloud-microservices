@@ -1,5 +1,14 @@
+app.eureka-server: localhost
+
 server:
   port: 10012
 
 springdoc:
   packagesToScan: ea.slartibartfast.merchant.api
+---
+app.eureka-server: discovery-server
+
+spring:
+  config:
+    activate:
+      on-profile: docker
