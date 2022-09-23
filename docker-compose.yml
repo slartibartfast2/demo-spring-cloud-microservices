@@ -8,6 +8,9 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   card-api:
     build: card-api-service
@@ -16,6 +19,9 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   auth-api:
     build: auth-api-service
@@ -24,6 +30,9 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   merchant-api:
     build: merchant-api-service
@@ -32,6 +41,9 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   gateway:
     build: gateway-server
@@ -62,6 +74,34 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=native
+
+  rabbitmq:
+    image: rabbitmq:3.10-management-alpine
+    mem_limit: 350m
+    networks:
+      - my-network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+  zipkin:
+    image: openzipkin/zipkin:2.23
+    mem_limit: 512m
+    networks:
+      - my-network
+    environment:
+      - STORAGE_TYPE=mem
+      - RABBIT_ADDRESSES=rabbitmq
+    ports:
+      - "9411:9411"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
 networks:
   my-network:

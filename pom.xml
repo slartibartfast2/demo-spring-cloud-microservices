@@ -26,6 +26,7 @@
         <projectlombok.version>1.18.24</projectlombok.version>
         <caffeine.version>3.1.1</caffeine.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
+        <zipkin.version>2.2.8.RELEASE</zipkin.version>
     </properties>
 
     <modules>
@@ -46,6 +47,11 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-zipkin</artifactId>
+                <version>${zipkin.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>

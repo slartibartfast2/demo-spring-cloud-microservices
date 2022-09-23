@@ -1,4 +1,5 @@
 app.eureka-server: localhost
+rabbitmq-server: 127.0.0.1
 
 server:
   port: 9090
@@ -6,8 +7,23 @@ server:
 jwt:
   secret: BvPHGM8C0ia4uOuxxqPD5DTbWC9F9TWvPStp3pb7ARo0oK2mJ3pd3YG4lxA9i8bj6OTbadwezxgeEByY
   expiration: 86400
+
+spring:
+  rabbitmq:
+    host: ${rabbitmq-server}
+    port: 5672
+    username: guest
+    password: guest
+  zipkin:
+    sender:
+      type: rabbit
+  sleuth:
+    sampler:
+      probability: 1.0
+
 ---
 app.eureka-server: discovery-server
+rabbitmq-server: rabbitmq
 
 spring:
   config:

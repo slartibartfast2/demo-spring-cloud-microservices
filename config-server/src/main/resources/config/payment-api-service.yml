@@ -1,12 +1,28 @@
 app.eureka-server: localhost
+rabbitmq-server: 127.0.0.1
 
 server:
   port: 10010
 
 springdoc:
   packagesToScan: ea.slartibartfast.payment
+
+spring:
+  rabbitmq:
+    host: ${rabbitmq-server}
+    port: 5672
+    username: guest
+    password: guest
+  zipkin:
+    sender:
+      type: rabbit
+  sleuth:
+    sampler:
+      probability: 1.0
+
 ---
 app.eureka-server: discovery-server
+rabbitmq-server: rabbitmq
 
 spring:
   config:
