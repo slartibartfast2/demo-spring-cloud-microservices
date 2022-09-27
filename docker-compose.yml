@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   payment-api:
-    build: payment-api-service
+    build: microservices/payment-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -10,7 +10,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   card-api:
-    build: card-api-service
+    build: microservices/card-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -18,7 +18,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   auth-api:
-    build: auth-api-service
+    build: spring-cloud/auth-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -26,7 +26,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   merchant-api:
-    build: merchant-api-service
+    build: microservices/merchant-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -34,7 +34,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   gateway:
-    build: gateway-server
+    build: spring-cloud/gateway-server
     mem_limit: 350m
     ports:
       - "8060:8060"
@@ -44,7 +44,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   discovery-server:
-    build: discovery-server
+    build: spring-cloud/discovery-server
     mem_limit: 350m
     ports:
       - "8061:8061"
@@ -54,7 +54,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   config-server:
-    build: config-server
+    build: spring-cloud/config-server
     mem_limit: 350m
     ports:
       - "8888:8888"
