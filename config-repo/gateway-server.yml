@@ -14,6 +14,32 @@ spring:
         locator:
           enabled: true
       routes:
+        - id: eureka-api
+          uri: http://${app.eureka-server}:8061
+          predicates:
+            - Path=/eureka/api/{segment}
+          filters:
+            - SetPath=/eureka/{segment}
+
+        - id: eureka-web-start
+          uri: http://${app.eureka-server}:8061
+          predicates:
+            - Path=/eureka/web
+          filters:
+            - SetPath=/
+
+        - id: eureka-web-other
+          uri: http://${app.eureka-server}:8061
+          predicates:
+            - Path=/eureka/**
+
+        - id: config-server
+          uri: lb://config-server
+          predicates:
+            - Path=/config/**
+          filters:
+            - RewritePath=/config/(?<segment>.*), /$\{segment}
+
         - id: payment-api-service
           uri: lb://payment-api-service
           predicates:
@@ -21,6 +47,7 @@ spring:
           filters:
             - StripPrefix=1
             - CustomGatewayFilter
+
         - id: card-api-service
           uri: lb://card-api-service
           predicates:
@@ -28,18 +55,21 @@ spring:
           filters:
             - StripPrefix=1
             - CustomGatewayFilter
+
         - id: merchant-api-service
           uri: lb://merchant-api-service
           predicates:
             - Path=/merchant/**
           filters:
             - StripPrefix=1
+
         - id: auth-api-service
           uri: lb://auth-api-service
           predicates:
             - Path=/auth/**
           filters:
             - RewritePath=/auth/(?<path>.*), /$\{path}
+
         - id: openapi
           uri: http://localhost:${server.port}
           predicates:

@@ -28,6 +28,12 @@ public class GatewayServerApplication {
     }
 
     @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
+
+    @Bean
     @Lazy(false)
     public List<GroupedOpenApi> apis(SwaggerUiConfigParameters swaggerUiConfigParameters, RouteDefinitionLocator locator) {
         List<GroupedOpenApi> groups = new ArrayList<>();
