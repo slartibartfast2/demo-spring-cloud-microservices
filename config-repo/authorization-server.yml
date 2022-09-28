@@ -1,0 +1,8 @@
+server:
+  port: 9999
+
+app.eureka-server: localhost
+---
+spring.profiles: docker
+
+app.eureka-server: discovery-server

@@ -33,6 +33,7 @@
         <module>spring-cloud/discovery-server</module>
         <module>spring-cloud/gateway-server</module>
         <module>spring-cloud/auth-api-service</module>
+        <module>spring-cloud/authorization-server</module>
         <module>microservices/payment-api-service</module>
         <module>microservices/card-api-service</module>
         <module>microservices/merchant-api-service</module>
