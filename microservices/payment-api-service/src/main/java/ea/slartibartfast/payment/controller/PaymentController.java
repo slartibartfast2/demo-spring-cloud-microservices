@@ -12,7 +12,8 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RestController("/")
+@RestController
+@RequestMapping("/payment")
 public class PaymentController {
 
     private final PaymentManager paymentManager;

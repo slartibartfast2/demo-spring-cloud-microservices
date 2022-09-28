@@ -30,6 +30,7 @@ public class HealthConfig {
         registry.put("payment-service", () -> getHealth("http://payment-api-service"));
         registry.put("merchant-service", () -> getHealth("http://merchant-api-service"));
         registry.put("card-service", () -> getHealth("http://card-api-service"));
+        registry.put("auth-server", () -> getHealth("http://authorization-server"));
 
         return CompositeReactiveHealthContributor.fromMap(registry);
     }

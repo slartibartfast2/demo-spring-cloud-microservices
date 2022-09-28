@@ -17,14 +17,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
-  auth-api:
-    build: spring-cloud/auth-api-service
-    mem_limit: 350m
-    networks:
-      - my-network
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-
   merchant-api:
     build: microservices/merchant-api-service
     mem_limit: 350m
@@ -65,7 +57,7 @@ services:
     networks:
       - my-network
 
-  auth-server:
+  authorization-server:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     build: spring-cloud/authorization-server
