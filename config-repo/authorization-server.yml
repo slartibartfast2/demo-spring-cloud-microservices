@@ -1,6 +1,9 @@
 server:
   port: 9999
 
+mock:
+  merchant.client.enabled: false
+
 app.eureka-server: localhost
 ---
 spring.profiles: docker
