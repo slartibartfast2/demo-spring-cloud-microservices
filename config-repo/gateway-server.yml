@@ -10,61 +10,56 @@ server.ssl:
   key-store-password: password
   key-alias: localhost
 
-spring:
-  security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-      routes:
-        - id: oauth-server
-          uri: lb://authorization-server
-          predicates:
-            - Path=/oauth2/**
+spring.cloud.gateway.discovery.locator.enabled: true
 
-        - id: eureka-api
-          uri: http://${app.eureka-server}:8061
-          predicates:
-            - Path=/eureka/api/{segment}
-          filters:
-            - SetPath=/eureka/{segment}
+spring.cloud.gateway.routes:
 
-        - id: eureka-web-start
-          uri: http://${app.eureka-server}:8061
-          predicates:
-            - Path=/eureka/web
-          filters:
-            - SetPath=/
+  - id: oauth-server
+    uri: lb://authorization-server
+    predicates:
+      - Path=/oauth2/**
 
-        - id: eureka-web-other
-          uri: http://${app.eureka-server}:8061
-          predicates:
-            - Path=/eureka/**
+  - id: eureka-api
+    uri: http://${app.eureka-server}:8061
+    predicates:
+      - Path=/eureka/api/{segment}
+    filters:
+      - SetPath=/eureka/{segment}
 
-        - id: config-server
-          uri: http://${app.config-server}:8888
-          predicates:
-            - Path=/config/**
-          filters:
-            - RewritePath=/config/(?<segment>.*), /$\{segment}
+  - id: eureka-web-start
+    uri: http://${app.eureka-server}:8061
+    predicates:
+      - Path=/eureka/web
+    filters:
+      - SetPath=/
 
-        - id: payment-api-service
-          uri: lb://payment-api-service
-          predicates:
-            - Path=/payment/**
+  - id: eureka-web-other
+    uri: http://${app.eureka-server}:8061
+    predicates:
+      - Path=/eureka/**
 
-        - id: merchant-api-service
-          uri: lb://merchant-api-service
-          predicates:
-            - Path=/merchant/**
+  - id: config-server
+    uri: http://${app.config-server}:8888
+    predicates:
+      - Path=/config/**
+    filters:
+      - RewritePath=/config/(?<segment>.*), /$\{segment}
 
-        - id: openapi
-          uri: http://localhost:${server.port}
-          predicates:
-            - Path=/v3/api-docs/**
-          filters:
-            - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+  - id: payment-api-service
+    uri: lb://payment-api-service
+    predicates:
+      - Path=/payment/**
+
+
+  - id: openapi
+    uri: http://localhost:${server.port}
+    predicates:
+      - Path=/v3/api-docs/**
+    filters:
+      - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
+
 ---
 app:
   eureka-server: discovery-server
