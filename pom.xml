@@ -32,7 +32,7 @@
         <module>spring-cloud/config-server</module>
         <module>spring-cloud/discovery-server</module>
         <module>spring-cloud/gateway-server</module>
-        <module>spring-cloud/auth-api-service</module>
+        <module>spring-cloud/authorization-server</module>
         <module>microservices/payment-api-service</module>
         <module>microservices/card-api-service</module>
         <module>microservices/merchant-api-service</module>
@@ -66,21 +66,6 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${projectlombok.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-api</artifactId>
-                <version>${jsonwebtoken.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-impl</artifactId>
-                <version>${jsonwebtoken.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-jackson</artifactId>
-                <version>${jsonwebtoken.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.retry</groupId>

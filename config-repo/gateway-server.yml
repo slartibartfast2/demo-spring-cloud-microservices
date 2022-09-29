@@ -1,19 +1,28 @@
-app.config-server: localhost
-app.eureka-server: localhost
+app:
+  eureka-server: localhost
+  auth-server: localhost
 
-server:
-  port: 8060
+server.port: 8443
 
-jwt:
-  secret: BvPHGM8C0ia4uOuxxqPD5DTbWC9F9TWvPStp3pb7ARo0oK2mJ3pd3YG4lxA9i8bj6OTbadwezxgeEByY
+server.ssl:
+  key-store-type: PKCS12
+  key-store: classpath:keystore/gateway.p12
+  key-store-password: password
+  key-alias: localhost
 
 spring:
+  security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
       routes:
+        - id: oauth-server
+          uri: lb://authorization-server
+          predicates:
+            - Path=/oauth2/**
+
         - id: eureka-api
           uri: http://${app.eureka-server}:8061
           predicates:
@@ -34,7 +43,7 @@ spring:
             - Path=/eureka/**
 
         - id: config-server
-          uri: lb://config-server
+          uri: http://${app.config-server}:8888
           predicates:
             - Path=/config/**
           filters:
@@ -44,31 +53,11 @@ spring:
           uri: lb://payment-api-service
           predicates:
             - Path=/payment/**
-          filters:
-            - StripPrefix=1
-            - CustomGatewayFilter
-
-        - id: card-api-service
-          uri: lb://card-api-service
-          predicates:
-            - Path=/card/**
-          filters:
-            - StripPrefix=1
-            - CustomGatewayFilter
 
         - id: merchant-api-service
           uri: lb://merchant-api-service
           predicates:
             - Path=/merchant/**
-          filters:
-            - StripPrefix=1
-
-        - id: auth-api-service
-          uri: lb://auth-api-service
-          predicates:
-            - Path=/auth/**
-          filters:
-            - RewritePath=/auth/(?<path>.*), /$\{path}
 
         - id: openapi
           uri: http://localhost:${server.port}
@@ -77,8 +66,9 @@ spring:
           filters:
             - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
 ---
-app.config-server: config-server
-app.eureka-server: discovery-server
+app:
+  eureka-server: discovery-server
+  auth-server: authorization-server
 
 spring:
   config:

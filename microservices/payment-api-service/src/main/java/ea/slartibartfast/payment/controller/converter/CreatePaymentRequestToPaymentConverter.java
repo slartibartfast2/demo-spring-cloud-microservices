@@ -4,7 +4,6 @@ import ea.slartibartfast.payment.controller.request.CreatePaymentRequest;
 import ea.slartibartfast.payment.model.Card;
 import ea.slartibartfast.payment.model.Merchant;
 import ea.slartibartfast.payment.model.Payment;
-import ea.slartibartfast.payment.model.PaymentChannel;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;

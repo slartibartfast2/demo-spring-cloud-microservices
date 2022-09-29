@@ -17,14 +17,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
-  auth-api:
-    build: spring-cloud/auth-api-service
-    mem_limit: 350m
-    networks:
-      - my-network
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-
   merchant-api:
     build: microservices/merchant-api-service
     mem_limit: 350m
@@ -36,10 +28,14 @@ services:
   gateway:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_SSL_KEY_STORE=file:/keystore/gateway.p12
+      - SERVER_SSL_KEY_STORE_PASSWORD=password
+    volumes:
+      - $PWD/keystore:/keystore
     build: spring-cloud/gateway-server
     mem_limit: 350m
     ports:
-      - "8060:8060"
+      - "8443:8443"
     networks:
       - my-network
 
@@ -61,6 +57,13 @@ services:
     networks:
       - my-network
 
+  authorization-server:
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    build: spring-cloud/authorization-server
+    mem_limit: 350m
+    networks:
+      - my-network
 
 networks:
   my-network:

@@ -12,6 +12,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/merchant")
 public class MerchantController {
 
     private final MerchantManager merchantManager;
