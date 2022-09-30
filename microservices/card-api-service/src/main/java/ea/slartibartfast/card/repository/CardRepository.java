@@ -4,6 +4,7 @@ import ea.slartibartfast.card.model.Card;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CardRepository {
 
@@ -23,7 +24,7 @@ public class CardRepository {
         return cards;
     }
 
-    public Card findByPayment(Long paymentId) {
-        return cards.stream().filter(c -> c.getPaymentId().equals(paymentId)).findFirst().orElse(null);
+    public Optional<Card> findByPayment(Long paymentId) {
+        return cards.stream().filter(c -> c.getPaymentId().equals(paymentId)).findFirst();
     }
 }

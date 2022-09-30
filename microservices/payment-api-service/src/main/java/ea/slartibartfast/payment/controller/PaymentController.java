@@ -6,7 +6,13 @@ import ea.slartibartfast.payment.controller.response.RetrievePaymentResponse;
 import ea.slartibartfast.payment.controller.response.RetrievePaymentResponseWithCard;
 import ea.slartibartfast.payment.manager.PaymentManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -34,7 +40,9 @@ public class PaymentController {
     }
 
     @GetMapping("/{id}/with-card")
-    public RetrievePaymentResponseWithCard retrievePaymentWithCard(@PathVariable("id") Long id) {
-        return paymentManager.retrievePaymentWithCard(id);
+    public RetrievePaymentResponseWithCard retrievePaymentWithCard(@PathVariable("id") Long id,
+                                                                   @RequestParam(value = "delay", required = false, defaultValue = "0")  int delay,
+                                                                   @RequestParam(value = "faultPercent", required = false, defaultValue = "0") int faultPercent) {
+        return paymentManager.retrievePaymentWithCard(id, delay, faultPercent);
     }
 }

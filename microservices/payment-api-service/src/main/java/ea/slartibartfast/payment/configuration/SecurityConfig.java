@@ -10,10 +10,11 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.mvcMatcher("/payment/**")
+        http.csrf().disable()
             .authorizeRequests()
-            .mvcMatchers("/payment/**")
-            .access("hasAuthority('SCOPE_api.read')")
+            .antMatchers("/actuator/**").permitAll()
+            .antMatchers("/payment/**").hasAuthority("SCOPE_api.read")
+            .anyRequest().authenticated()
             .and()
             .oauth2ResourceServer()
             .jwt();

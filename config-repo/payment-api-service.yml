@@ -5,6 +5,40 @@ app:
 server:
   port: 10010
 
+resilience4j.timelimiter:
+  instances:
+    cardService:
+      timeoutDuration: 2s
+
+resilience4j.retry:
+  backends:
+    product:
+      maxRetryAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+        - ea.slartibartfast.payment.exception.CardNotFoundException
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cardService:
+        slidingWindowType: TIME_BASED
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10000            #10 seconds
+        minimumNumberOfCalls: 5                   #unit request
+        permittedNumberOfCallsInHalfOpenState: 5  #unit request
+        failureRateThreshold: 50                  #percent
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        ignoreExceptions:
+          - ea.slartibartfast.payment.exception.PaymentNotFoundException
+          - ea.slartibartfast.payment.exception.CardNotFoundException
+        registerHealthIndicator: true
+
+management.health.circuitbreakers.enabled: true
+
 spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
 
 springdoc:
