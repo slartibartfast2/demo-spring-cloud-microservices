@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class MockCardClient implements CardClient {
 
     @Override
-    public Card findByPayment(Long paymentId) {
+    public Card findByPayment(long paymentId, int delay, int faultPercent) {
         return Card.builder().id(-1L).cardNumber("1111222233334444").cardHolderName("John Doe").build();
     }
 }

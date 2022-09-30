@@ -4,8 +4,12 @@ server:
 mock:
   merchant.client.enabled: false
 
-app.eureka-server: localhost
+app:
+  eureka-server: localhost
+  jwt.issuer-uri: http://localhost:9999
 ---
 spring.profiles: docker
 
-app.eureka-server: discovery-server
+app:
+  eureka-server: discovery-server
+  jwt.issuer-uri: http://authorization-server:9999
