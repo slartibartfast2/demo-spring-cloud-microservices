@@ -5,6 +5,35 @@ app:
 server:
   port: 10010
 
+resilience4j.retry:
+  backends:
+    product:
+      maxRetryAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+        - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cardService:
+        slidingWindowType: TIME_BASED
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10000            #10 seconds
+        minimumNumberOfCalls: 5                   #unit request
+        permittedNumberOfCallsInHalfOpenState: 5  #unit request
+        failureRateThreshold: 50                  #percent
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        ignoreExceptions:
+          - ea.slartibartfast.payment.exception.PaymentNotFoundException
+        registerHealthIndicator: true
+  timelimiter:
+    instances:
+      cardService:
+        timeoutDuration: 2s
+
+management.health.circuitbreakers.enabled: true
+
 spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
 
 springdoc:

@@ -50,7 +50,6 @@ spring.cloud.gateway.routes:
     predicates:
       - Path=/payment/**
 
-
   - id: openapi
     uri: http://localhost:${server.port}
     predicates:
