@@ -5,6 +5,8 @@ app:
 server:
   port: 10010
 
+server.forward-headers-strategy: framework
+
 resilience4j.timelimiter:
   instances:
     cardService:

@@ -14,10 +14,20 @@ spring.cloud.gateway.discovery.locator.enabled: true
 
 spring.cloud.gateway.routes:
 
-  - id: oauth-server
+  - id: oauth2-server
     uri: lb://authorization-server
     predicates:
       - Path=/oauth2/**
+
+  - id: oauth2-login
+    uri: lb://authorization-server
+    predicates:
+      - Path=/login/**
+
+  - id: oauth2-error
+    uri: lb://authorization-server
+    predicates:
+      - Path=/error/**
 
   - id: eureka-api
     uri: http://${app.eureka-server}:8061

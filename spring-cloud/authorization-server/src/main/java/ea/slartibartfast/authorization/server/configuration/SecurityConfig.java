@@ -17,11 +17,10 @@ public class SecurityConfig {
 
     // @formatter:off
     @Bean
-    @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
             throws Exception {
         http
-                .authorizeHttpRequests((authorize) -> authorize
+                .authorizeHttpRequests(authorize -> authorize
                         .antMatchers("/actuator/**").permitAll()
                         .mvcMatchers("/.well-known/jwks.json").permitAll()
                         .anyRequest().authenticated()

@@ -26,6 +26,8 @@
         <projectlombok.version>1.18.24</projectlombok.version>
         <caffeine.version>3.1.1</caffeine.version>
         <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
+        <oauth2-authorization-server.version>0.3.1</oauth2-authorization-server.version>
+        <nimbus-jose-jwt.version>9.25.4</nimbus-jose-jwt.version>
     </properties>
 
     <modules>
@@ -71,6 +73,11 @@
                 <groupId>org.springframework.retry</groupId>
                 <artifactId>spring-retry</artifactId>
                 <version>${spring-retry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-oauth2-authorization-server</artifactId>
+                <version>${oauth2-authorization-server.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

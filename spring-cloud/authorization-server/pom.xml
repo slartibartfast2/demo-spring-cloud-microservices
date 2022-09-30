@@ -12,11 +12,6 @@
 
     <artifactId>authorization-server</artifactId>
 
-    <properties>
-        <oauth2-authorization-server.version>0.3.1</oauth2-authorization-server.version>
-        <nimbus-jose-jwt.version>9.25.4</nimbus-jose-jwt.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -29,7 +24,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
-            <version>${oauth2-authorization-server.version}</version>
         </dependency>
 
         <dependency>
