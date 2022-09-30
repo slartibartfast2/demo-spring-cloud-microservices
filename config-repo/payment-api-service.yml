@@ -5,13 +5,21 @@ app:
 server:
   port: 10010
 
+resilience4j.timelimiter:
+  instances:
+    cardService:
+      timeoutDuration: 2s
+
 resilience4j.retry:
   backends:
     product:
       maxRetryAttempts: 3
       waitDuration: 1000
       retryExceptions:
-        - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+        - ea.slartibartfast.payment.exception.CardNotFoundException
 
 resilience4j:
   circuitbreaker:
@@ -26,11 +34,8 @@ resilience4j:
         automaticTransitionFromOpenToHalfOpenEnabled: true
         ignoreExceptions:
           - ea.slartibartfast.payment.exception.PaymentNotFoundException
+          - ea.slartibartfast.payment.exception.CardNotFoundException
         registerHealthIndicator: true
-  timelimiter:
-    instances:
-      cardService:
-        timeoutDuration: 2s
 
 management.health.circuitbreakers.enabled: true
 

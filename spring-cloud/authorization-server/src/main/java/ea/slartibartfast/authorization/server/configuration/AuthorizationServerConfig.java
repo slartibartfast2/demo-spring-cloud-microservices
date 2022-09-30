@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import ea.slartibartfast.authorization.server.util.Jwks;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -28,6 +29,9 @@ import java.util.UUID;
 
 @Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfig {
+
+    @Value("${app.jwt.issuer-uri}")
+    private String jwtIssuerUri;
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -82,7 +86,7 @@ public class AuthorizationServerConfig {
     @Bean
     public ProviderSettings providerSettings() {
         return ProviderSettings.builder()
-                               .issuer("http://authorization-server:9999")
+                               .issuer(jwtIssuerUri)
                                .build();
     }
 
