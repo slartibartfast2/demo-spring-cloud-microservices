@@ -1,7 +1,15 @@
-FROM openjdk:11.0.5
+FROM amazoncorretto:11.0.16 as builder
+WORKDIR extracted
+ADD ./target/*.jar app.jar
+RUN java -Djarmode=layertools -jar app.jar extract
+
+FROM amazoncorretto:11.0.16
+WORKDIR application
+COPY --from=builder extracted/dependencies/ ./
+COPY --from=builder extracted/spring-boot-loader/ ./
+COPY --from=builder extracted/snapshot-dependencies/ ./
+COPY --from=builder extracted/application/ ./
 
 EXPOSE 8888
 
-ADD ./target/*.jar app.jar
-
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]

@@ -3,6 +3,7 @@ version: '2.1'
 services:
   payment-api:
     build: microservices/payment-api-service
+    image: slartibartfast/payment-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -11,6 +12,7 @@ services:
 
   card-api:
     build: microservices/card-api-service
+    image: slartibartfast/card-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -19,6 +21,7 @@ services:
 
   merchant-api:
     build: microservices/merchant-api-service
+    image: slartibartfast/merchant-api-service
     mem_limit: 350m
     networks:
       - my-network
@@ -33,6 +36,7 @@ services:
     volumes:
       - $PWD/keystore:/keystore
     build: spring-cloud/gateway-server
+    image: slartibartfast/gateway
     mem_limit: 350m
     ports:
       - "8443:8443"
@@ -46,6 +50,7 @@ services:
     volumes:
       - $PWD/config-repo:/config-repo
     build: spring-cloud/config-server
+    image: slartibartfast/config-server
     mem_limit: 350m
     networks:
       - my-network
@@ -54,6 +59,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     build: spring-cloud/authorization-server
+    image: slartibartfast/auth-server
     mem_limit: 350m
     networks:
       - my-network
