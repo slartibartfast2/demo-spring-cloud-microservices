@@ -1,14 +1,9 @@
-app.eureka-server: localhost
-
 server:
   port: 10011
 
 springdoc:
   packagesToScan: ea.slartibartfast.card
 ---
-app.eureka-server: discovery-server
+spring.config.activate.on-profile: docker
 
-spring:
-  config:
-    activate:
-      on-profile: docker
+server.port: 80

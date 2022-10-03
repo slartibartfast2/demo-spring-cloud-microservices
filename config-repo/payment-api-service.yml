@@ -1,7 +1,3 @@
-app:
-  eureka-server: localhost
-  auth-server: localhost
-
 server:
   port: 10010
 
@@ -46,11 +42,6 @@ spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:
 springdoc:
   packagesToScan: ea.slartibartfast.payment
 ---
-app:
-  eureka-server: discovery-server
-  auth-server: authorization-server
+spring.config.activate.on-profile: docker
 
-spring:
-  config:
-    activate:
-      on-profile: docker
+server.port: 80

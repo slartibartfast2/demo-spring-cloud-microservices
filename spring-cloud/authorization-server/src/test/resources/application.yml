@@ -1,6 +1,5 @@
 spring:
   cloud.config.enabled: false
-  cloud.discovery.enabled: false
 
 mock:
   merchant:

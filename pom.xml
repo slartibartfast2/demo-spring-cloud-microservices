@@ -32,7 +32,6 @@
 
     <modules>
         <module>spring-cloud/config-server</module>
-        <module>spring-cloud/discovery-server</module>
         <module>spring-cloud/gateway-server</module>
         <module>spring-cloud/authorization-server</module>
         <module>microservices/payment-api-service</module>

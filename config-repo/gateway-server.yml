@@ -1,7 +1,3 @@
-app:
-  eureka-server: localhost
-  auth-server: localhost
-
 server.port: 8443
 
 server.ssl:
@@ -10,55 +6,34 @@ server.ssl:
   key-store-password: password
   key-alias: localhost
 
-spring.cloud.gateway.discovery.locator.enabled: true
-
 spring.cloud.gateway.routes:
 
+  - id: payment-api-service
+    uri: http://payment-api-service
+    predicates:
+      - Path=/payment/**
+
   - id: oauth2-server
-    uri: lb://authorization-server
+    uri: http://${app.auth-server}
     predicates:
       - Path=/oauth2/**
 
   - id: oauth2-login
-    uri: lb://authorization-server
+    uri: http://${app.auth-server}
     predicates:
       - Path=/login/**
 
   - id: oauth2-error
-    uri: lb://authorization-server
+    uri: http://${app.auth-server}
     predicates:
       - Path=/error/**
 
-  - id: eureka-api
-    uri: http://${app.eureka-server}:8061
-    predicates:
-      - Path=/eureka/api/{segment}
-    filters:
-      - SetPath=/eureka/{segment}
-
-  - id: eureka-web-start
-    uri: http://${app.eureka-server}:8061
-    predicates:
-      - Path=/eureka/web
-    filters:
-      - SetPath=/
-
-  - id: eureka-web-other
-    uri: http://${app.eureka-server}:8061
-    predicates:
-      - Path=/eureka/**
-
   - id: config-server
-    uri: http://${app.config-server}:8888
+    uri: ${spring.cloud.config.uri}
     predicates:
       - Path=/config/**
     filters:
       - RewritePath=/config/(?<segment>.*), /$\{segment}
-
-  - id: payment-api-service
-    uri: lb://payment-api-service
-    predicates:
-      - Path=/payment/**
 
   - id: openapi
     uri: http://localhost:${server.port}
@@ -70,11 +45,4 @@ spring.cloud.gateway.routes:
 spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
 
 ---
-app:
-  eureka-server: discovery-server
-  auth-server: authorization-server
-
-spring:
-  config:
-    activate:
-      on-profile: docker
+spring.config.activate.on-profile: docker

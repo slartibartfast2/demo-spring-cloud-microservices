@@ -39,14 +39,6 @@ services:
     networks:
       - my-network
 
-  discovery-server:
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    build: spring-cloud/discovery-server
-    mem_limit: 350m
-    networks:
-      - my-network
-
   config-server:
     environment:
       - SPRING_PROFILES_ACTIVE=docker,native

@@ -5,12 +5,10 @@ server.forward-headers-strategy: framework
 mock:
   merchant.client.enabled: false
 
-app:
-  eureka-server: localhost
-  jwt.issuer-uri: http://localhost:9999
+app.jwt.issuer-uri: http://localhost:9999
 ---
-spring.profiles: docker
+spring.config.activate.on-profile: docker
 
-app:
-  eureka-server: discovery-server
-  jwt.issuer-uri: http://authorization-server:9999
+server.port: 80
+
+app.jwt.issuer-uri: http://authorization-server:9999
