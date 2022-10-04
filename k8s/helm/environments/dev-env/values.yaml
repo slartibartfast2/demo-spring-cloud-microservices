@@ -1,0 +1,8 @@
+secrets:
+
+  config-server-secrets:
+    ENCRYPT_KEY: my-very-secure-encrypt-key
+
+config-server:
+  envFromSecretRefs:
+    - config-server-secrets

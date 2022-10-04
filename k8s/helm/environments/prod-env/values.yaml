@@ -1,0 +1,73 @@
+secrets:
+
+  config-server-secrets:
+    ENCRYPT_KEY: my-very-secure-encrypt-key
+
+config-server:
+  image:
+    tag: v1
+  env:
+    LOGGING_LEVEL_ROOT: WARN
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
+  envFromSecretRefs:
+    - config-server-secrets
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 400Mi
+
+gateway:
+  image:
+    tag: v1
+  env:
+    SPRING_PROFILES_ACTIVE: "docker,prod"
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 400Mi
+
+auth-server:
+  image:
+    tag: v1
+  env:
+    SPRING_PROFILES_ACTIVE: "docker,prod"
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 400Mi
+
+card-api:
+  image:
+    tag: v1
+  env:
+    SPRING_PROFILES_ACTIVE: "docker,prod"
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 400Mi
+
+merchant-api:
+  image:
+    tag: v1
+  env:
+    SPRING_PROFILES_ACTIVE: "docker,prod"
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 400Mi
+
+payment-api:
+  image:
+    tag: v1
+  env:
+    SPRING_PROFILES_ACTIVE: "docker,prod"
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 400Mi

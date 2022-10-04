@@ -1,0 +1,11 @@
+fullnameOverride: card-api-service
+
+image:
+  name: card-api-service
+
+env:
+  SPRING_PROFILES_ACTIVE: "docker"
+
+livenessProbe_enabled: true
+
+readinessProbe_enabled: true

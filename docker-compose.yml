@@ -28,7 +28,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
-  gateway:
+  gateway-server:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_SSL_KEY_STORE=file:/keystore/gateway.p12
@@ -36,7 +36,7 @@ services:
     volumes:
       - $PWD/keystore:/keystore
     build: spring-cloud/gateway-server
-    image: slartibartfast/gateway
+    image: slartibartfast/gateway-server
     mem_limit: 350m
     ports:
       - "8443:8443"
