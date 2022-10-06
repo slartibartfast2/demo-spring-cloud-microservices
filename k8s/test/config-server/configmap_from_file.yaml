@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-server
+  labels:
+    app.kubernetes.io/name: config-server
+    helm.sh/chart: config-server-1.0.0
+    app.kubernetes.io/managed-by: Helm
+data:
+  application.yml: |-
+    app:
+      auth-server: localhost
+    
+    logging:
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+    
+    # WARNING: Exposing all management endpoints over http should only be used during development, must be locked down in production!
+    management.endpoint.health.show-details: "ALWAYS"
+    management.endpoints.web.exposure.include: "*"
+    management.endpoint.health.probes.enabled: true    
+    
+    server.shutdown: graceful
+    spring.lifecycle.timeout-per-shutdown-phase: 10s
+    
+    ---
+    spring.config.activate.on-profile: docker
+    
+    app:
+      auth-server: authorization-server
+  authorization-server.yml: |-
+    spring.application.name: authorization-server
+    
+    server.port: 9999
+    server.forward-headers-strategy: framework
+    
+    mock:
+      merchant.client.enabled: false
+    
+    app.jwt.issuer-uri: http://${app.auth-server}:9999
+    ---
+    spring.config.activate.on-profile: docker
+    
+    server.port: 80
+  card-api-service.yml: |-
+    spring.application.name: card-api-service
+    
+    server.port: 10011
+    
+    springdoc:
+      packagesToScan: ea.slartibartfast.card
+    ---
+    spring.config.activate.on-profile: docker
+    
+    server.port: 80
+  gateway-server.yml: |-
+    spring.application.name: gateway
+    
+    server.port: 8080
+    
+    spring.cloud.gateway.routes:
+      
+      - id: payment-api-service
+        uri: http://payment-api-service
+        predicates:
+          - Path=/payment/**
+      
+      - id: oauth2-server
+        uri: http://${app.auth-server}
+        predicates:
+          - Path=/oauth2/**
+      
+      - id: oauth2-login
+        uri: http://${app.auth-server}
+        predicates:
+          - Path=/login/**
+      
+      - id: oauth2-error
+        uri: http://${app.auth-server}
+        predicates:
+          - Path=/error/**
+      
+      - id: config-server
+        uri: ${spring.cloud.config.uri}
+        predicates:
+          - Path=/config/**
+        filters:
+          - RewritePath=/config/(?<segment>.*), /$\{segment}
+      
+      - id: openapi
+        uri: http://localhost:${server.port}
+        predicates:
+          - Path=/v3/api-docs/**
+        filters:
+          - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+    
+    spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
+    
+    ---
+    spring.config.activate.on-profile: docker
+  merchant-api-service.yml: |-
+    spring.application.name: merchant-api-service
+    
+    server.port: 10012
+    
+    springdoc:
+      packagesToScan: ea.slartibartfast.merchant.api
+    ---
+    spring.config.activate.on-profile: docker
+    
+    server.port: 80
+  payment-api-service.yml: |-
+    spring.application.name: payment-api-service
+    
+    server.port: 10010
+    
+    server.forward-headers-strategy: framework
+    
+    spring:
+      cloud:
+        kubernetes:
+          loadbalancer:
+            mode: service
+          discovery.all-namespaces: true
+    
+    resilience4j.timelimiter:
+      instances:
+        cardService:
+          timeoutDuration: 2s
+    
+    resilience4j.retry:
+      backends:
+        product:
+          maxRetryAttempts: 3
+          waitDuration: 1000
+          retryExceptions:
+            - org.springframework.web.client.HttpServerErrorException
+          ignoreExceptions:
+            - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+            - ea.slartibartfast.payment.exception.CardNotFoundException
+    
+    resilience4j:
+      circuitbreaker:
+        instances:
+          cardService:
+            slidingWindowType: TIME_BASED
+            slidingWindowSize: 10
+            waitDurationInOpenState: 10000            #10 seconds
+            minimumNumberOfCalls: 5                   #unit request
+            permittedNumberOfCallsInHalfOpenState: 5  #unit request
+            failureRateThreshold: 50                  #percent
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+            ignoreExceptions:
+              - ea.slartibartfast.payment.exception.PaymentNotFoundException
+              - ea.slartibartfast.payment.exception.CardNotFoundException
+            registerHealthIndicator: true
+    
+    management.health.circuitbreakers.enabled: true
+    
+    spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
+    
+    springdoc:
+      packagesToScan: ea.slartibartfast.payment
+    ---
+    spring.config.activate.on-profile: docker
+    
+    server.port: 80
