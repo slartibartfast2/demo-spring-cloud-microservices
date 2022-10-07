@@ -2,11 +2,11 @@
 /k8s/helm/components/config-server/charts/common-0.1.0.tgz
 /k8s/helm/components/config-server/charts/common-1.0.0.tgz
 /k8s/helm/components/gateway/charts/common-1.0.0.tgz
-/k8s/helm/components/payment-api/charts/common-1.0.0.tgz
+/k8s/helm/components/payment-api-service/charts/common-1.0.0.tgz
 /k8s/helm/environments/dev-env/charts/common-1.0.0.tgz
-/k8s/helm/components/auth-server/charts/common-1.0.0.tgz
-/k8s/helm/components/card-api/charts/common-1.0.0.tgz
-/k8s/helm/components/merchant-api/charts/common-1.0.0.tgz
+/k8s/helm/components/authorization-server/charts/common-1.0.0.tgz
+/k8s/helm/components/card-api-service/charts/common-1.0.0.tgz
+/k8s/helm/components/merchant-api-service/charts/common-1.0.0.tgz
 /k8s/helm/environments/dev-env/charts/auth-server-1.0.0.tgz
 /k8s/helm/environments/prod-env/charts/auth-server-1.0.0.tgz
 /k8s/helm/environments/dev-env/charts/card-api-1.0.0.tgz
@@ -20,3 +20,11 @@
 /k8s/helm/environments/prod-env/charts/merchant-api-1.0.0.tgz
 /k8s/helm/environments/dev-env/charts/payment-api-1.0.0.tgz
 /k8s/helm/environments/prod-env/charts/payment-api-1.0.0.tgz
+/k8s/helm/environments/dev-env/charts/authorization-server-1.0.0.tgz
+/k8s/helm/environments/prod-env/charts/authorization-server-1.0.0.tgz
+/k8s/helm/environments/dev-env/charts/card-api-service-1.0.0.tgz
+/k8s/helm/environments/prod-env/charts/card-api-service-1.0.0.tgz
+/k8s/helm/environments/dev-env/charts/merchant-api-service-1.0.0.tgz
+/k8s/helm/environments/prod-env/charts/merchant-api-service-1.0.0.tgz
+/k8s/helm/environments/dev-env/charts/payment-api-service-1.0.0.tgz
+/k8s/helm/environments/prod-env/charts/payment-api-service-1.0.0.tgz

@@ -27,10 +27,10 @@ public class HealthConfig {
     public ReactiveHealthContributor coreServices() {
         final Map<String, ReactiveHealthIndicator> registry = new LinkedHashMap<>();
 
-        registry.put("payment-service", () -> getHealth("http://payment-api-service"));
-        registry.put("merchant-service", () -> getHealth("http://merchant-api-service"));
-        registry.put("card-service", () -> getHealth("http://card-api-service"));
-        registry.put("auth-server", () -> getHealth("http://authorization-server"));
+        registry.put("payment-service", () -> getHealth("http://payment-api-service:4004"));
+        registry.put("merchant-service", () -> getHealth("http://merchant-api-service:4004"));
+        registry.put("card-service", () -> getHealth("http://card-api-service:4004"));
+        registry.put("auth-server", () -> getHealth("http://authorization-server:4004"));
 
         return CompositeReactiveHealthContributor.fromMap(registry);
     }

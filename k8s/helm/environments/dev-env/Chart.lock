@@ -2,17 +2,17 @@ dependencies:
 - name: common
   repository: file://../../common
   version: 1.0.0
-- name: auth-server
-  repository: file://../../components/auth-server
+- name: authorization-server
+  repository: file://../../components/authorization-server
   version: 1.0.0
-- name: card-api
-  repository: file://../../components/card-api
+- name: card-api-service
+  repository: file://../../components/card-api-service
   version: 1.0.0
-- name: merchant-api
-  repository: file://../../components/merchant-api
+- name: merchant-api-service
+  repository: file://../../components/merchant-api-service
   version: 1.0.0
-- name: payment-api
-  repository: file://../../components/payment-api
+- name: payment-api-service
+  repository: file://../../components/payment-api-service
   version: 1.0.0
-digest: sha256:a8be46e07acffe963983865001b10e90f112e4a316425a49d6d24e2fac832df3
-generated: "2022-10-06T10:01:33.256191+03:00"
+digest: sha256:6f72dac0713c2874f6f72fcbd93b06c84c4c93e7b9f1610cd638aa4e327988cd
+generated: "2022-10-08T00:38:18.245672+03:00"

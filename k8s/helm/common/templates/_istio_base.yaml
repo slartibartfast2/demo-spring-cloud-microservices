@@ -1,0 +1,129 @@
+{{- define "common.istio_base" -}}
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: payment-request-authentication
+spec:
+  jwtRules:
+    - forwardOriginalToken: true
+      issuer: http://authorization-server:80
+      jwksUri: http://authorization-server.slartibartfast.svc.cluster.local/oauth2/jwks
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-api-service
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: payment-require-jwt
+spec:
+  action: ALLOW
+  rules:
+    - {}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-api-service
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+spec:
+  mtls:
+    mode: PERMISSIVE
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: slartibartfast-gw
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - "kubernetes.docker.internal"
+      port:
+        name: https
+        number: 443
+        protocol: HTTPS
+      tls:
+        credentialName: slartibartfast-certificate
+        mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: slartibartfast-vs
+spec:
+  gateways:
+    - slartibartfast-gw
+  hosts:
+    - "kubernetes.docker.internal"
+  http:
+    - match:
+        - uri:
+            prefix: /oauth2
+      route:
+        - destination:
+            host: authorization-server
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: /login
+      route:
+        - destination:
+            host: authorization-server
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: /error
+      route:
+        - destination:
+            host: authorization-server
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: /payment
+      route:
+        - destination:
+            host: payment-api-service
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: health-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - "health.kubernetes.docker.internal"
+      port:
+        number: 443
+        name: https-health
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: slartibartfast-certificate
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: health-vs
+spec:
+  hosts:
+    - "health.kubernetes.docker.internal"
+  gateways:
+    - health-gateway
+  http:
+    - route:
+        - destination:
+            host: payment-api-service
+            port:
+              number: 4004
+{{- end -}}

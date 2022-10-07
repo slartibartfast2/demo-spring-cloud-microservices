@@ -6,6 +6,8 @@ server.ssl:
   key-store: classpath:keystore/gateway.p12
   key-alias: localhost
 
+management.server.port: 8443
+
 spring.cloud.gateway.routes:
 
   - id: payment-api-service

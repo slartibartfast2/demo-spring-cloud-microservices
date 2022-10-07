@@ -1,0 +1,36 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: slartibartfast-certificate
+spec:
+  commonName: kubernetes.docker.internal
+  subject:
+    countries:
+      - my-country
+    localities:
+      - my-locality
+    organizationalUnits:
+      - my-ou
+    organizations:
+      - my-org
+    postalCodes:
+      - my-pc
+    provinces:
+      - my-province
+    serialNumber: my-sn
+    streetAddresses:
+      - my-address
+  dnsNames:
+    - kubernetes.docker.internal
+    - health.kubernetes.docker.internal
+    - dashboard.kubernetes.docker.internal
+    - kiali.kubernetes.docker.internal
+    - tracing.kubernetes.docker.internal
+    - prometheus.kubernetes.docker.internal
+    - grafana.kubernetes.docker.internal
+    - kibana.kubernetes.docker.internal
+    - elasticsearch.kubernetes.docker.internal
+    - mail.kubernetes.docker.internal
+  issuerRef:
+    name: ca-issuer
+  secretName: slartibartfast-certificate

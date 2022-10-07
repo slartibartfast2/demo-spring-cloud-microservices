@@ -1,17 +1,5 @@
-ingress:
-  host: kubernetes.docker.internal
-  paths:
-    - path: /oauth2
-      service: authorization-server
-    - path: /login
-      service: authorization-server
-    - path: /error
-      service: authorization-server
-    - path: /payment
-      service: payment-api-service
-    - path: /actuator/health
-      service: payment-api-service
-    - path: /openapi
-      service: payment-api-service
-    - path: /webjars
-      service: payment-api-service
+destinationRules:
+  - name: payment-api-service
+  - name: authorization-server
+  - name: card-api-service
+  - name: merchant-api-service

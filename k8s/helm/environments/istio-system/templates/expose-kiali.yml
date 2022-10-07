@@ -1,0 +1,49 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: kiali-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - "kiali.kubernetes.docker.internal"
+      port:
+        number: 443
+        name: https-kiali
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: slartibartfast-certificate
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kiali-vs
+  namespace: istio-system
+spec:
+  gateways:
+    - kiali-gateway
+  hosts:
+    - "kiali.kubernetes.docker.internal"
+  http:
+    - match:
+        - uri:
+            prefix: /kiali
+      route:
+        - destination:
+            host: kiali
+            port:
+              number: 20001
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  host: kiali
+  trafficPolicy:
+    tls:
+      mode: DISABLE

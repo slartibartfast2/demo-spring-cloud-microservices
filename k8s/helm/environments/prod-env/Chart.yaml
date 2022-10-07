@@ -10,18 +10,18 @@ dependencies:
     version: 1.0.0
     repository: file://../../common
 
-  - name: auth-server
+  - name: authorization-server
     version: 1.0.0
-    repository: file://../../components/auth-server
+    repository: file://../../components/authorization-server
 
-  - name: product
+  - name: card-api-service
     version: 1.0.0
-    repository: file://../../components/card-api
+    repository: file://../../components/card-api-service
 
-  - name: recommendation
+  - name: merchant-api-service
     version: 1.0.0
-    repository: file://../../components/merchant-api
+    repository: file://../../components/merchant-api-service
 
-  - name: review
+  - name: payment-api-service
     version: 1.0.0
-    repository: file://../../components/payment-api
+    repository: file://../../components/payment-api-service

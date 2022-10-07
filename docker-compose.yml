@@ -72,7 +72,7 @@ services:
     volumes:
       - $PWD/config-repo:/config-repo
     healthcheck:
-      test: [ "CMD", "curl", "-fs", "http://localhost/actuator/health" ]
+      test: [ "CMD", "curl", "-fs", "http://localhost:4004/actuator/health" ]
       interval: 5s
       timeout: 2s
       retries: 60

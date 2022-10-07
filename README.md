@@ -214,3 +214,250 @@ Verify the result with the `cat /etc/hosts` command. Expect a line that contains
 
 **Note:** `If you're using kubernetes with docker-desktop you should use port forwarding with ingress service.
    kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 30443:443`
+
+
+### Deploying Istio in a Kubernetes cluster
+
+1. Install the istioctl binary with curl and add the istioctl client to your path, on a macOS or Linux system:
+
+        $ curl -sL https://istio.io/downloadIstioctl | sh -
+        $ export PATH=$HOME/.istioctl/bin:$PATH
+
+2. Run a precheck to verify that the Kubernetes cluster is ready for installing Istio in it:
+
+       istioctl experimental precheck
+3. Install Istio using the demo profile with the following command:
+
+       istioctl install --skip-confirmation \
+       --set profile=demo \
+       --set meshConfig.accessLogFile=/dev/stdout \
+       --set meshConfig.accessLogEncoding=JSON
+
+   The accessLog parameters are used to enable the Istio proxies to log requests that are processed. Once Pods are up and running with Istio proxies installed, 
+   the access logs can be inspected with the command kubectl logs <MY-POD> -c istio-proxy.
+
+4. Wait for the Deployment objects and their Pods to be available with the following command:
+
+       kubectl -n istio-system wait --timeout=600s --for=condition=available deployment --all
+
+5. Next, install the extra components with the commands:
+
+
+      istio_version=$(istioctl version --short --remote=false)
+      echo "Installing integrations for Istio v$istio_version"
+      
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/${istio_version}/samples/addons/kiali.yaml
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/kiali.yaml
+      
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/${istio_version}/samples/addons/jaeger.yaml
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/jaeger.yaml
+      
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/${istio_version}/samples/addons/prometheus.yaml
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/prometheus.yaml
+      
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/${istio_version}/samples/addons/grafana.yaml
+      kubectl apply -n istio-system -f https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/grafana.yaml
+
+   **Note:** `If any of these commands fail, try rerunning the failing command. Errors can occur due to timing issues, which can be resolved by running commands again. Specifically, the installation of Kiali can result in error messages starting with unable to recognize. Rerunning the command makes these error messages go away.`
+
+6. Wait a second time for the extra components to be available with the following command:
+
+       kubectl -n istio-system wait --timeout=600s --for=condition=available deployment --all
+
+7. Finally, run the following command to see what we got installed:
+
+       kubectl -n istio-system get deploy
+
+   Expect output similar to this:
+
+       NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+       grafana                1/1     1            1           62s
+       istio-egressgateway    1/1     1            1           6m20s
+       istio-ingressgateway   1/1     1            1           6m20s
+       istiod                 1/1     1            1           6m50s
+       jaeger                 1/1     1            1           83s
+       kiali                  1/1     1            1           2m11s
+       prometheus             1/1     1            1           69s
+
+8. Run the following command to apply the Helm chart:
+
+       helm upgrade --install istio-hands-on-addons k8s/helm/environments/istio-system -n istio-system --wait
+
+   This will result in the gateway being able to route requests for the following hostnames to the corresponding Kubernetes Service:
+
+        kiali.kubernetes.docker.internal requests are routed to kiali:20001
+        tracing.kubernetes.docker.internal requests are routed to tracing:80
+        prometheus.kubernetes.docker.internal requests are routed to prometheus:9000
+        grafana.kubernetes.docker.internal requests are routed to grafana:3000
+
+   To verify that the certificate and secret objects have been created, run the following commands:
+
+        kubectl -n istio-system get secret slartibartfast-certificate
+        kubectl -n istio-system get certificate  slartibartfast-certificate
+
+   Expect output like this:
+
+        NAME                         TYPE                DATA   AGE
+        slartibartfast-certificate   kubernetes.io/tls   3      4m6s
+        NAME                         READY   SECRET                       AGE
+        slartibartfast-certificate   True    slartibartfast-certificate   4m11s
+
+9. Remove the line in `/etc/hosts` where `kubernetes.docker.internal` points to the IP address of the Minikube instance (minikube ip). 
+Verify that `/etc/hosts` only contains one line that translates `kubernetes.docker.internal` and that it points to the IP address 
+of the Istio ingress gateway; the value of $INGRESS_IP:
+
+       kubectl get svc -n istio-system istio-ingressgateway`
+       127.0.0.1 kubernetes.docker.internal grafana.kubernetes.docker.internal kiali.kubernetes.docker.internal prometheus.kubernetes.docker.internal tracing kubernetes.docker.internal kibana.kubernetes.docker.internal elasticsearch.kubernetes.docker.internal mail.kubernetes.docker.internal health.kubernetes.docker.internal
+
+You can use port forwarding without minikube;
+
+      kubectl port-forward --namespace=istio-system service/istio-ingressgateway 30443:443
+
+10. Verify that Kiali, Jaeger, Grafana, and Prometheus can be reached through the tunnel with the following commands:
+
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://kiali.kubernetes.docker.internal/kiali/
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://tracing.kubernetes.docker.internal
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://grafana.kubernetes.docker.internal
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://prometheus.kubernetes.docker.internal/graph#/
+
+Each command should return 200 (OK). If the request sent to Kiali doesn't return 200, it often means that its internal initialization is not complete. Wait a minute and try again in that case.
+
+### Running commands to create the service mesh
+
+Create the service mesh by running the following commands:
+
+1. Build Docker images from source with the following commands:
+
+       eval $(minikube docker-env)
+       mvn clean package -DskipTests && docker-compose build
+
+2. Recreate the hands-on Namespace, and set it as the default Namespace:
+
+       kubectl delete namespace slartibartfast
+       kubectl apply -f k8s/slartibartfast-namespace.yaml
+       kubectl config set-context $(kubectl config current-context) --namespace=slartibartfast
+
+  Note that the hands-on-namespace.yml file creates the hands-on Namespace labeled with istio-injection: enabled.
+  This means that Pods created in this Namespace will get istio-proxy containers injected as sidecars automatically.
+  
+3. Resolve the Helm chart dependencies with the following commands:
+  1. First, we update the dependencies in the components folder:
+
+        `for f in k8s/helm/components/*; do helm dep up $f; done`
+
+  2. Next, we update the dependencies in the environments folder:
+
+        `for f in k8s/helm/environments/*; do helm dep up $f; done`
+  3. Before using the Helm charts, render the templates using the helm template command to see what the manifests will look like:
+
+        `helm template k8s/helm/environments/dev-env`
+
+4. Deploy the system landscape using Helm and wait for all Deployments to complete:
+
+    `helm install slartibartfast-dev-env \
+      k8s/helm/environments/dev-env \
+      -n slartibartfast --wait`
+
+   OR
+
+    `helm upgrade --install slartibartfast-dev-env k8s/helm/environments/dev-env`
+
+5. Once the Deployment is complete, verify that we have two containers in each of the microservice Pods:
+
+    `kubectl get pods`
+
+Expect a response along the lines of the following:
+
+     NAME                                    READY   STATUS    RESTARTS   AGE
+     authorization-server-76574857b6-rv2sj   2/2     Running   0          35s
+     card-api-service-778494dcd5-rpqnq       2/2     Running   0          35s
+     merchant-api-service-74cfd4fb99-2ht9d   2/2     Running   0          35s
+     payment-api-service-68f64dbfb9-xpt29    2/2     Running   0          35s
+
+Note that the Pods that run our microservices report two containers per Pod; that is, they have the Istio proxy injected as a sidecar!
+
+### Authenticating external requests using OAuth 2.0/OIDC access tokens
+
+Istio Ingress Gateway can require and validate JWT-based OAuth 2.0/OIDC access tokens, in other words, protecting the microservices in the 
+service mesh from external unauthenticated requests. Istio can also be configured to perform authorization but, we will not use it.
+
+This is configured in the common Helm chart's template, `_istio_base.yaml`. We inserted `RequestAuthentication` and `AuthorizationPolicy` objects.
+
+From the manifests, we can see the following:
+
+    The RequestAuthentication named payment-request-authentication requires a valid JWT-encoded access token for requests sent to the payment-api service:
+        It selects services that it performs request authentication for based on a label selector, app.kubernetes.io/name: payment-api-service.
+        It allows tokens from the issuer, http://authorization-server:80.
+        It will use the http://authorization-server.slartibartfast.svc.cluster.local/oauth2/jwks URL to fetch a JSON Web Key Set. 
+          The key set is used to validate the digital signature of the access tokens.
+        It will forward the access token to the underlying services, in our case the payment-api microservice.
+    The AuthorizationPolicy named payment-require-jwt is configured to allow all requests to the payment-api service; it will not apply any authorization rules.
+
+It can be a bit hard to understand whether Istio's RequestAuthentication is validating the access tokens or whether it is only the payment-api service 
+that is performing the validation. One way to ensure that Istio is doing its job is to change the configuration of RequestAuthentication so that it always rejects access tokens.
+
+To verify that RequestAuthentication is in action, apply the following commands:
+
+Make a normal request:
+
+    ACCESS_TOKEN=$(curl -k https://writer:secretkubernetes.docker.internal:30443/oauth2/token?grant_type=client_credentials -d grant_type=client_credentials -s | jq .access_token -r)
+    echo ACCESS_TOKEN=$ACCESS_TOKEN
+    curl -k https://kubernetes.docker.internal:30443/payment/1 -H "Authorization: Bearer $ACCESS_TOKEN" -i
+
+Verify that it returns an HTTP response status code 200 (OK).
+Edit the RequestAuthentication object and temporarily change the issuer, for example, to `http://authorization-server-x`:
+
+    kubectl edit RequestAuthentication payment-request-authentication
+
+Verify the change:
+
+    kubectl get RequestAuthentication payment-request-authentication -o yaml
+
+Verify that the issuer has been updated, in my case to `http://authorization-server-x`.
+Make the request again. It should fail with the HTTP response status code 401 (Unauthorized) and the error message Jwt issuer is not configured:
+
+    curl -k https://kubernetes.docker.internal:30443/payment/1 -H "Authorization: Bearer $ACCESS_TOKEN" -i
+
+Since it takes a few seconds for Istio to propagate the change, the new name of the issuer, you might need to repeat the command a couple of times before it fails.
+
+This proves that Istio is validating the access tokens!
+Revert the changed name of the issuer back to http://authorization-server:
+
+    kubectl edit RequestAuthentication payment-request-authentication
+
+Verify that the request works again. First, wait a few seconds for the change to be propagated. Then, run the command:
+
+    curl -k https://kubernetes.docker.internal:30443/payment/1 -H "Authorization: Bearer $ACCESS_TOKEN"
+
+**Note:** You can use `istioctl proxy-config cluster {ingressPodName} -n istio-system` command to fetch proxy address for authentication-server. Expect an output
+like below:
+
+      SERVICE FQDN                                              PORT      SUBSET     DIRECTION     TYPE           DESTINATION RULE
+      authorization-server.slartibartfast.svc.cluster.local     80        -          outbound      EDS            authorization-server.slartibartfast
+      card-api-service.slartibartfast.svc.cluster.local         80        -          outbound      EDS            card-api-service.slartibartfast
+      ...
+
+
+### Protecting internal communication using mutual authentication (mTLS)
+
+In this section, we will learn how Istio can be configured to automatically protect internal communication within the service mesh using mutual authentication (mTLS). When using mutual authentication, not only does the service prove its identity by exposing a certificate, but the clients also prove their identity to the service by exposing a client-side certificate. This provides a higher level of security compared to normal TLS/HTTPS usage, where only the identity of the service is proven. Setting up and maintaining mutual authentication, that is, the provisioning of new, and rotating of outdated, certificates to the clients, is known to be complex and is therefore seldom used. Istio fully automates the provisioning and rotation of certificates for mutual authentication used for internal communication inside the service mesh. This makes it much easier to use mutual authentication compared to setting it up manually.
+
+To enable the use of mutual authentication managed by Istio, Istio needs to be configured both on the server side, using a policy called `PeerAuthentication`, 
+and on the client side, using a `DestinationRule`.
+
+The policy is configured in the `common` Helm chart's template, `_istio_base.yaml`.
+
+`PeerAuthentication` policy is configured to allow both mTLS and plain HTTP requests using the `PERMISSIVE` mode. This enables Kubernetes to call liveness and readiness probes using plain HTTP.
+
+We have also already met the DestinationRule manifests in the Content in the `_istio_dr_mutual_tls.yaml` template section. The central part of the DestinationRule manifests for requiring mTLS looks like this:
+
+      trafficPolicy:
+      tls:
+      mode: ISTIO_MUTUAL
+
+To verify that the internal communication is protected by mTLS, perform the following steps:
+
+1. Go to the Kiali graph in a web browser (`https://kiali.kubernetes.docker.internal`).
+2. Click on the **Display** button and enable the **Security** label. The graph will show a padlock on all communication links that are protected by Istio's automated mutual authentication.
+
+**Note:** If you want to debug `istio ingress` you can change log level with `istioctl proxy-config log istio-ingressgateway-587765668-vfknn --level info -n istio-system` command.
