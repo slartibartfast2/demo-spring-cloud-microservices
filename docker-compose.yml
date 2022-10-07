@@ -9,6 +9,12 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/payment-api-service.yml
+    volumes:
+      - $PWD/config-repo:/config-repo
+    depends_on:
+      authorization-server:
+        condition: service_healthy
 
   card-api:
     build: microservices/card-api-service
@@ -18,6 +24,9 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/card-api-service.yml
+    volumes:
+      - $PWD/config-repo:/config-repo
 
   merchant-api:
     build: microservices/merchant-api-service
@@ -27,14 +36,19 @@ services:
       - my-network
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/merchant-api-service.yml
+    volumes:
+      - $PWD/config-repo:/config-repo
 
   gateway-server:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/gateway-server.yml
       - SERVER_SSL_KEY_STORE=file:/keystore/gateway.p12
-      - SERVER_SSL_KEY_STORE_PASSWORD=password
+      - SERVER_SSL_KEY_STORE_PASSWORD=${GATEWAY_TLS_PWD}
     volumes:
       - $PWD/keystore:/keystore
+      - $PWD/config-repo:/config-repo
     build: spring-cloud/gateway-server
     image: slartibartfast/gateway-server
     mem_limit: 350m
@@ -42,15 +56,26 @@ services:
       - "8443:8443"
     networks:
       - my-network
+    depends_on:
+      authorization-server:
+        condition: service_healthy
 
   authorization-server:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/authorization-server.yml
     build: spring-cloud/authorization-server
     image: slartibartfast/auth-server
     mem_limit: 350m
     networks:
       - my-network
+    volumes:
+      - $PWD/config-repo:/config-repo
+    healthcheck:
+      test: [ "CMD", "curl", "-fs", "http://localhost/actuator/health" ]
+      interval: 5s
+      timeout: 2s
+      retries: 60
 
 networks:
   my-network:
