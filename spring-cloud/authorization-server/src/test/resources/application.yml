@@ -1,12 +1,7 @@
 spring:
-  cloud.config.enabled: false
-
-mock:
-  merchant:
-    client:
-      enabled: true
----
-spring:
   config:
     activate:
       on-profile: test
+
+mock:
+  merchant.client.enabled: true

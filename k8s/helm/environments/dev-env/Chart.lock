@@ -2,12 +2,6 @@ dependencies:
 - name: common
   repository: file://../../common
   version: 1.0.0
-- name: config-server
-  repository: file://../../components/config-server
-  version: 1.0.0
-- name: gateway
-  repository: file://../../components/gateway
-  version: 1.0.0
 - name: auth-server
   repository: file://../../components/auth-server
   version: 1.0.0
@@ -20,5 +14,5 @@ dependencies:
 - name: payment-api
   repository: file://../../components/payment-api
   version: 1.0.0
-digest: sha256:d4fccdb09c25ed9c8c17662ffe550262aa2a1c392319a0020289b3c1c9592309
-generated: "2022-10-05T11:38:45.593754+03:00"
+digest: sha256:a8be46e07acffe963983865001b10e90f112e4a316425a49d6d24e2fac832df3
+generated: "2022-10-06T10:01:33.256191+03:00"

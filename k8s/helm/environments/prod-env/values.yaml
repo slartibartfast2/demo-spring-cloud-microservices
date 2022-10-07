@@ -1,22 +1,3 @@
-secrets:
-
-  config-server-secrets:
-    ENCRYPT_KEY: my-very-secure-encrypt-key
-
-config-server:
-  image:
-    tag: v1
-  env:
-    LOGGING_LEVEL_ROOT: WARN
-    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
-  envFromSecretRefs:
-    - config-server-secrets
-  resources:
-    requests:
-      memory: 200Mi
-    limits:
-      memory: 400Mi
-
 gateway:
   image:
     tag: v1
