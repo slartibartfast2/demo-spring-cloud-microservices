@@ -29,22 +29,28 @@ public class PaymentManager {
     private final CardIntegrationService cardIntegrationService;
 
     public RetrievePaymentResponse retrievePayment(Long id) {
+        log.info("Will get payment without card info for id={}", id);
         Payment payment = paymentRepository.findById(id);
         return paymentToRetrievePaymentResponseConverter.apply(payment);
     }
 
     public List<RetrievePaymentResponse> retrieveAllPayments() {
+        log.info("Will get all payments");
         List<Payment> payments = paymentRepository.findAll();
         return payments.stream().map(paymentToRetrievePaymentResponseConverter).collect(Collectors.toList());
     }
 
     public CreatePaymentResponse createPayment(CreatePaymentRequest createPaymentRequest) {
+        log.info("Will create payment for amount={} for merchant={}",
+                 createPaymentRequest.getAmount(),
+                 createPaymentRequest.getMerchantName());
         Payment payment = createPaymentRequestToPaymentConverter.apply(createPaymentRequest);
         paymentRepository.add(payment);
         return CreatePaymentResponse.builder().status("success").build();
     }
 
     public RetrievePaymentResponseWithCard retrievePaymentWithCard(Long id, int delay, int faultPercent) {
+        log.info("Will get payment with card info for id={}", id);
         Payment payment = paymentRepository.findById(id);
         payment.setCard(cardIntegrationService.retrievePaymentWithCard(id, delay, faultPercent));
         return paymentToRetrievePaymentResponseWithCardConverter.apply(payment);

@@ -24,6 +24,7 @@ public class MerchantManager {
     private final AuthRequestToMerchantConverter authRequestToMerchantConverter;
 
     public MerchantVo retrieveMerchant(Long id) {
+        log.info("Will get merchant info for id={}", id);
         Merchant merchant = merchantRepository.findById(id);
         return merchantToVoConverter.apply(merchant);
     }

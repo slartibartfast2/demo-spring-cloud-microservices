@@ -40,6 +40,12 @@ management.health.circuitbreakers.enabled: true
 
 spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
 
+logging:
+  level:
+    root: INFO
+    ea.slartibartfast: DEBUG
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
+
 springdoc:
   packagesToScan: ea.slartibartfast.payment
 ---

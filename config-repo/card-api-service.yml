@@ -2,6 +2,11 @@ spring.application.name: card-api-service
 
 server.port: 10011
 
+logging:
+  level:
+    root: INFO
+    ea.slartibartfast: DEBUG
+
 springdoc:
   packagesToScan: ea.slartibartfast.card
 ---

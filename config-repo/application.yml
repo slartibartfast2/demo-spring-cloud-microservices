@@ -1,10 +1,6 @@
 app:
   auth-server: localhost
 
-logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
-
 # WARNING: Exposing all management endpoints over http should only be used during development, must be locked down in production!
 management.server.port: 4004
 management.endpoint.health.show-details: "ALWAYS"

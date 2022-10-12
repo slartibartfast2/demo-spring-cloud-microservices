@@ -2,6 +2,11 @@ spring.application.name: merchant-api-service
 
 server.port: 10012
 
+logging:
+  level:
+    root: INFO
+    ea.slartibartfast: DEBUG
+
 springdoc:
   packagesToScan: ea.slartibartfast.merchant.api
 ---

@@ -315,10 +315,10 @@ You can use port forwarding without minikube;
 
 10. Verify that Kiali, Jaeger, Grafana, and Prometheus can be reached through the tunnel with the following commands:
 
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://kiali.kubernetes.docker.internal/kiali/
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://tracing.kubernetes.docker.internal
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://grafana.kubernetes.docker.internal
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://prometheus.kubernetes.docker.internal/graph#/
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://kiali.kubernetes.docker.internal:30443/kiali/
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://tracing.kubernetes.docker.internal:30443
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://grafana.kubernetes.docker.internal:30443
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://prometheus.kubernetes.docker.internal:30443/graph#/
 
 Each command should return 200 (OK). If the request sent to Kiali doesn't return 200, it often means that its internal initialization is not complete. Wait a minute and try again in that case.
 
@@ -331,13 +331,13 @@ Create the service mesh by running the following commands:
        eval $(minikube docker-env)
        mvn clean package -DskipTests && docker-compose build
 
-2. Recreate the hands-on Namespace, and set it as the default Namespace:
+2. Recreate the slartibartfast Namespace, and set it as the default Namespace:
 
        kubectl delete namespace slartibartfast
        kubectl apply -f k8s/slartibartfast-namespace.yaml
        kubectl config set-context $(kubectl config current-context) --namespace=slartibartfast
 
-  Note that the hands-on-namespace.yml file creates the hands-on Namespace labeled with istio-injection: enabled.
+  Note that the slartibartfast-namespace.yml file creates the slartibartfast Namespace labeled with istio-injection: enabled.
   This means that Pods created in this Namespace will get istio-proxy containers injected as sidecars automatically.
   
 3. Resolve the Helm chart dependencies with the following commands:
@@ -429,8 +429,7 @@ Verify that the request works again. First, wait a few seconds for the change to
 
     curl -k https://kubernetes.docker.internal:30443/payment/1 -H "Authorization: Bearer $ACCESS_TOKEN"
 
-**Note:** You can use `istioctl proxy-config cluster {ingressPodName} -n istio-system` command to fetch proxy address for authentication-server. Expect an output
-like below:
+**Note:** You can use `istioctl proxy-config cluster deploy/istio-ingressgateway -n istio-system` command to fetch proxy address for authentication-server. Expect an output like below:
 
       SERVICE FQDN                                              PORT      SUBSET     DIRECTION     TYPE           DESTINATION RULE
       authorization-server.slartibartfast.svc.cluster.local     80        -          outbound      EDS            authorization-server.slartibartfast
@@ -460,4 +459,105 @@ To verify that the internal communication is protected by mTLS, perform the foll
 1. Go to the Kiali graph in a web browser (`https://kiali.kubernetes.docker.internal`).
 2. Click on the **Display** button and enable the **Security** label. The graph will show a padlock on all communication links that are protected by Istio's automated mutual authentication.
 
-**Note:** If you want to debug `istio ingress` you can change log level with `istioctl proxy-config log istio-ingressgateway-587765668-vfknn --level info -n istio-system` command.
+**Note:** If you want to debug `istio ingress` you can change log level with `istioctl proxy-config log deploy/istio-ingressgateway --level debug -n istio-system` command.
+
+
+### Deploying Elasticsearch and Kibana
+
+We will deploy Elasticsearch and Kibana to their own namespace, `logging`. Both Elasticsearch and Kibana will be deployed for development and test usage using a Kubernetes Deployment and Service object. The services will expose the standard ports for Elasticsearch and Kibana internally in the Kubernetes cluster, that is, port `9200` for Elasticsearch and port `5601` for Kibana.
+
+To provide external HTTP access to Elasticsearch and Kibana, we will create Istio objects in the same way as we did with Kiali and Jaeger – This will result in Elasticsearch and Kibana being available on [https://elasticsearch.kubernetes.docker.internal]() and [https://kibana.kubernetes.docker.internal]().
+
+The manifest files have been packaged in a Helm chart located in the folder `kubernetes/helm/environments/logging`.
+
+We will use the versions that were available when this chapter was written:
+
+* Elasticsearch version 7.12.1
+* Kibana version 7.12.1
+
+#### Running the deploy commands
+
+Deploy Elasticsearch and Kibana by performing the following steps:
+
+To make the deploy steps run faster, prefetch the Docker images for Elasticsearch and Kibana with the following commands:
+
+    eval $(minikube docker-env) ** for minikube only**
+    docker pull docker.elastic.co/elasticsearch/elasticsearch:7.12.1
+    docker pull docker.elastic.co/kibana/kibana:7.12.1
+
+Use the Helm chart to create the `logging` namespace, deploy Elasticsearch and Kibana in it, and wait for the Pods to be ready:
+
+    helm install logging-hands-on-add-on k8s/helm/environments/logging \
+        -n logging --create-namespace --wait
+
+Verify that Elasticsearch is up and running with the following command:
+
+    curl https://elasticsearch.kubernetes.docker.internal:30443 -sk | jq -r .tagline
+
+Expect `You Know, for Search` as a response.
+
+Depending on your hardware, you might need to wait for a minute or two before Elasticsearch responds with this message.
+Verify that Kibana is up and running with the following command:
+
+    curl https://kibana.kubernetes.docker.internal:30443 \
+      -kLs -o /dev/null -w "%{http_code}\n"
+
+Expect `200` as the response.
+
+Again, you might need to wait for a minute or two before Kibana is initialized and responds with 200.
+
+With Elasticsearch and Kibana deployed, we can start to deploy Fluentd.
+
+To deploy Fluentd, we have to build the Docker image, create the ConfigMap, and finally deploy the DaemonSet. Run the following commands to perform these steps:
+
+Build the Docker image and tag it with slartibartfast/fluentd:v1 using the following command:
+
+    eval $(minikube docker-env)
+    docker build -f k8s/efk/Dockerfile -t slartibartfast/fluentd:v1 k8s/efk/
+
+Create the ConfigMap, deploy Fluentd's DaemonSet, and wait for the Pod to be ready with the following commands:
+
+    kubectl apply -f k8s/efk/fluentd-slartibartfast-configmap.yml 
+    kubectl apply -f k8s/efk/fluentd-sa.yml
+    kubectl apply -f k8s/efk/fluentd-ds.yml
+    kubectl wait --timeout=120s --for=condition=Ready pod -l app=fluentd -n kube-system
+
+If you need to rollout and deploy again you can use;
+
+    kubectl rollout restart daemonset fluentd -n kube-system
+
+Verify that the Fluentd Pod is healthy with the following command:
+
+    kubectl logs -n kube-system -l app=fluentd --tail=-1 | grep "fluentd worker is now running worker"
+
+Expect a response of `2022-10-11 19:14:35 +0000 [info]: #0 fluentd worker is now running worker=0`.
+
+**Note:** As for Elasticsearch and Kibana, you might need to wait for a minute or two before Fluentd responds with this message.
+
+Fluentd will start to collect a considerable number of log records from the various containers in the Minikube instance. After a minute or so, you can ask Elasticsearch how many log records have been collected with the following command:
+
+    curl https://elasticsearch.kubernetes.docker.internal:30443/_all/_count -sk | jq .count
+
+The command can be a bit slow the first time it is executed but should return a total count of several thousands of log records. 
+In my case, it returned `31336`.
+
+This completes the deployment of the EFK stack. Now, it's time to try it out and find out what all the collected log records are about!
+
+### Initializing Kibana
+
+Before we start to use Kibana, we must specify what search indices to use in Elasticsearch and what field in the indices holds the timestamps for the log records.
+
+**Note** Just a quick reminder that we are using a certificate created by our own CA, meaning that it is not trusted by web browsers! 
+For a recap on how to make web browsers accept our certificate, see Chapter 18, the Observing the service mesh section.
+
+Perform the following steps to initialize Kibana:
+
+1. Open Kibana's web UI using the [https://kibana.kubernetes.docker.internal:30443]() URL in a web browser.
+2. On the welcome page, **Welcome to Kibana**, click on the **Explore on my own** button.
+3. If you get a popup saying **Your data is not secure**, you can simply click on **Don't show again** and click on the **Dismiss** button. We don't need to secure the data stored in this book.
+4. Click on the "hamburger menu" (three horizontal lines) in the upper-left corner and click on **Visualize Library** in the menu to the left. You will be asked to define an index pattern that's used by Kibana to identify what Elasticsearch indices it should retrieve log records from. Click on the button named **Create index pattern**.
+5. Enter `logstash-*` as the index pattern name and click on the Next Step button.
+6. On the next page, you will be asked to specify the name of the field that contains the timestamp for the log records. Click on the drop-down list for the **Time** field and select the only available field, **@timestamp**.
+7. Click on the **Create index pattern** button.
+
+Kibana will show a page that summarizes the fields that are available in the selected indices.

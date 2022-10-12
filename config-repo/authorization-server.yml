@@ -3,6 +3,11 @@ spring.application.name: authorization-server
 server.port: 9999
 server.forward-headers-strategy: framework
 
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+
 mock:
   merchant.client.enabled: false
 

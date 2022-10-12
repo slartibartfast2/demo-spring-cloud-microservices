@@ -16,6 +16,7 @@ public class CardManager {
     private final CardRepository cardRepository;
 
     public Card retrieveCardByPayment(Long paymentId, int delay, int faultPercent) {
+        log.info("Will get card info for paymentId={}", paymentId);
         if (delay > 0) {
             try {
                 Thread.sleep(delay * 1000);
