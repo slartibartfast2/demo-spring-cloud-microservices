@@ -6,6 +6,7 @@ management.server.port: 4004
 management.endpoint.health.show-details: "ALWAYS"
 management.endpoints.web.exposure.include: "*"
 management.endpoint.health.probes.enabled: true
+management.metrics.tags.application: ${spring.application.name}
 
 server.shutdown: graceful
 spring.lifecycle.timeout-per-shutdown-phase: 10s

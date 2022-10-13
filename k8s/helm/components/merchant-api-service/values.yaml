@@ -1,5 +1,11 @@
 fullnameOverride: merchant-api-service
 
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "4004"
+  prometheus.io/scheme: http
+  prometheus.io/path: "/actuator/prometheus"
+
 image:
   name: merchant-api-service
 

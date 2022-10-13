@@ -561,3 +561,5 @@ Perform the following steps to initialize Kibana:
 7. Click on the **Create index pattern** button.
 
 Kibana will show a page that summarizes the fields that are available in the selected indices.
+
+### Monitoring microservices using Grafana dashboards
