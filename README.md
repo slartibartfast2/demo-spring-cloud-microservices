@@ -315,10 +315,10 @@ You can use port forwarding without minikube;
 
 10. Verify that Kiali, Jaeger, Grafana, and Prometheus can be reached through the tunnel with the following commands:
 
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://kiali.kubernetes.docker.internal/kiali/
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://tracing.kubernetes.docker.internal
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://grafana.kubernetes.docker.internal
-        curl -o /dev/null -sk -L -w "%{http_code}\n" https://prometheus.kubernetes.docker.internal/graph#/
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://kiali.kubernetes.docker.internal:30443/kiali/
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://tracing.kubernetes.docker.internal:30443
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://grafana.kubernetes.docker.internal:30443
+        curl -o /dev/null -sk -L -w "%{http_code}\n" https://prometheus.kubernetes.docker.internal:30443/graph#/
 
 Each command should return 200 (OK). If the request sent to Kiali doesn't return 200, it often means that its internal initialization is not complete. Wait a minute and try again in that case.
 
@@ -331,13 +331,13 @@ Create the service mesh by running the following commands:
        eval $(minikube docker-env)
        mvn clean package -DskipTests && docker-compose build
 
-2. Recreate the hands-on Namespace, and set it as the default Namespace:
+2. Recreate the slartibartfast Namespace, and set it as the default Namespace:
 
        kubectl delete namespace slartibartfast
        kubectl apply -f k8s/slartibartfast-namespace.yaml
        kubectl config set-context $(kubectl config current-context) --namespace=slartibartfast
 
-  Note that the hands-on-namespace.yml file creates the hands-on Namespace labeled with istio-injection: enabled.
+  Note that the slartibartfast-namespace.yml file creates the slartibartfast Namespace labeled with istio-injection: enabled.
   This means that Pods created in this Namespace will get istio-proxy containers injected as sidecars automatically.
   
 3. Resolve the Helm chart dependencies with the following commands:
@@ -429,8 +429,7 @@ Verify that the request works again. First, wait a few seconds for the change to
 
     curl -k https://kubernetes.docker.internal:30443/payment/1 -H "Authorization: Bearer $ACCESS_TOKEN"
 
-**Note:** You can use `istioctl proxy-config cluster {ingressPodName} -n istio-system` command to fetch proxy address for authentication-server. Expect an output
-like below:
+**Note:** You can use `istioctl proxy-config cluster deploy/istio-ingressgateway -n istio-system` command to fetch proxy address for authentication-server. Expect an output like below:
 
       SERVICE FQDN                                              PORT      SUBSET     DIRECTION     TYPE           DESTINATION RULE
       authorization-server.slartibartfast.svc.cluster.local     80        -          outbound      EDS            authorization-server.slartibartfast
@@ -460,4 +459,11 @@ To verify that the internal communication is protected by mTLS, perform the foll
 1. Go to the Kiali graph in a web browser (`https://kiali.kubernetes.docker.internal`).
 2. Click on the **Display** button and enable the **Security** label. The graph will show a padlock on all communication links that are protected by Istio's automated mutual authentication.
 
-**Note:** If you want to debug `istio ingress` you can change log level with `istioctl proxy-config log istio-ingressgateway-587765668-vfknn --level info -n istio-system` command.
+**Note:** If you want to debug `istio ingress` you can change log level with `istioctl proxy-config log deploy/istio-ingressgateway --level debug -n istio-system` command.
+
+**Note 2:** At some point i was getting the following error `Jwks doesn’t have key to match kid or alg from Jwt` .
+Without changing anything, after a random amount of time (usually minutes) I can see in the logs that my cached JWT public key is updated:
+
+    2022-10-12T09:09:45.317540Z info model Updated cached JWT public key from "http://authorization-server.slartibartfast.svc.cluster.local/oauth2/jwks"
+
+After the cache is updated I could finally query my service.
