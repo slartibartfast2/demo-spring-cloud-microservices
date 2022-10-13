@@ -461,6 +461,12 @@ To verify that the internal communication is protected by mTLS, perform the foll
 
 **Note:** If you want to debug `istio ingress` you can change log level with `istioctl proxy-config log deploy/istio-ingressgateway --level debug -n istio-system` command.
 
+**Note 2:** At some point i was getting the following error `Jwks doesn’t have key to match kid or alg from Jwt` .
+Without changing anything, after a random amount of time (usually minutes) I can see in the logs that my cached JWT public key is updated:
+
+    2022-10-12T09:09:45.317540Z info model Updated cached JWT public key from "http://authorization-server.slartibartfast.svc.cluster.local/oauth2/jwks"
+
+After the cache is updated I could finally query my service.
 
 ### Deploying Elasticsearch and Kibana
 
